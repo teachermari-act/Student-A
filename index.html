@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Permite zoom com os dedos (pinch-to-zoom) no celular para ler caligrafia antiga -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Blackwood Manor - Player A: Field Dossier</title>
+  <style>
+    :root {
+      --bg: #050508;
+      --card-bg: #0f0c13;
+      --border: #3d2338;
+      --blood: #8b0000;
+      --bright-red: #ff3344;
+      --amber: #fca311;
+      --text-main: #f0edf5;
+      --text-muted: #b8b0c4;
+      --font-display: 'Courier New', Courier, monospace;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 8px 30px 8px;
+      position: relative;
+      touch-action: manipulation;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.18) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dossier-header {
+      width: 100%;
+      background: #000;
+      border: 1px solid #3d1c2b;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-display);
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .header-tag {
+      font-size: 0.78rem;
+      color: #ff7788;
+      letter-spacing: 1px;
+      font-weight: bold;
+    }
+    .player-badge {
+      background: #2b0b14;
+      border: 1.5px solid var(--bright-red);
+      color: var(--bright-red);
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+
+    /* Barra de abas otimizada para toque no celular com scroll horizontal suave */
+    .tabs-bar {
+      display: flex;
+      gap: 6px;
+      background: #0c0910;
+      border: 1px solid #2a1626;
+      padding: 6px;
+      border-radius: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .tabs-bar::-webkit-scrollbar {
+      height: 4px;
+    }
+    .tabs-bar::-webkit-scrollbar-thumb {
+      background: #4a2842;
+      border-radius: 2px;
+    }
+
+    .tab-btn {
+      flex: 0 0 auto;
+      min-width: 90px;
+      background: #15101c;
+      border: 1px solid #3d2338;
+      color: var(--text-muted);
+      padding: 12px 10px; /* touch target confortável */
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      text-align: center;
+      transition: all 0.2s;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .tab-btn:hover, .tab-btn:active {
+      background: #271429;
+      color: #fff;
+      border-color: var(--bright-red);
+    }
+    .tab-btn.active {
+      background: var(--blood);
+      border-color: var(--bright-red);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(255, 51, 68, 0.4);
+    }
+
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      animation: fadeIn 0.25s ease;
+    }
+    .tab-pane.active {
+      display: flex;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .canvas-container {
+      width: 100%;
+      border: 1px solid #1f1a16;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.9);
+      position: relative;
+      background: #000;
+      border-radius: 6px;
+      overflow: hidden;
+      touch-action: pan-x pan-y pinch-zoom;
+    }
+    .document-image {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .zoom-hint {
+      font-size: 0.72rem;
+      color: #999;
+      text-align: right;
+      padding: 0 4px;
+      font-family: var(--font-display);
+    }
+
+    .warning-box {
+      background: #18090f;
+      border-left: 3.5px solid var(--bright-red);
+      border-top: 1px solid #3d1c2b;
+      border-right: 1px solid #3d1c2b;
+      border-bottom: 1px solid #3d1c2b;
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      color: #ffccd4;
+      line-height: 1.5;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <div class="dossier-header">
+      <div class="header-tag">ARCHIVIST FIELD DOSSIER // VANCE 1984</div>
+      <div class="player-badge">PLAYER A</div>
+    </div>
+
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab('tab-cover', this)">📁 COVER</button>
+      <button class="tab-btn" onclick="switchTab('tab-gate', this)">0. GATES</button>
+      <button class="tab-btn" onclick="switchTab('tab-study', this)">1. STUDY</button>
+      <button class="tab-btn" onclick="switchTab('tab-crypt', this)">2. CRYPT</button>
+      <button class="tab-btn" onclick="switchTab('tab-storage', this)">3. STORAGE</button>
+      <button class="tab-btn" onclick="switchTab('tab-vault', this)">4. VAULT</button>
+    </div>
+
+    <!-- TAB 0: COVER -->
+    <div class="tab-pane active" id="tab-cover">
+      <div class="canvas-container">
+        <img src="https://i.imgur.com/MyCC5Gm.jpeg" alt="Student A Dossier Cover" class="document-image" crossorigin="anonymous">
+      </div>
+      <div class="zoom-hint">🔍 Toque duplo ou pinça com 2 dedos para aproximar</div>
+      <div class="warning-box">
+        <strong>ARCHIVIST BRIEFING:</strong> You hold the Blackwood Manor investigation folder. When instructed, tap the appropriate room tab above to inspect Vance's notes.
+      </div>
+    </div>
+
+    <!-- TAB 1: 0. GATES -->
+    <div class="tab-pane" id="tab-gate">
+      <div class="canvas-container">
+        <img src="https://i.imgur.com/Ykx1EbN.jpeg" alt="Torn Expedition Notebook Entry" class="document-image" crossorigin="anonymous">
+      </div>
+      <div class="zoom-hint">🔍 Dica: Dê zoom para ler o texto manuscrito</div>
+      <div class="warning-box">
+        ⚠️ <strong>MANDATORY PROTOCOL:</strong> You hold Vance's written diary scrap. Only Player B has the stone crest reliefs. Do not show your screen. Discuss in English to deduce the 4-letter lock word!
+      </div>
+    </div>
+
+    <!-- TAB 2: 1. STUDY -->
+    <div class="tab-pane" id="tab-study">
+      <div class="canvas-container">
+        <img src="https://i.imgur.com/jQnc7Ic.jpeg" alt="Sector 01 Vance Notes" class="document-image" crossorigin="anonymous">
+      </div>
+      <div class="zoom-hint">🔍 Dica: Dê zoom para ler os frascos excluídos</div>
+      <div class="warning-box">
+        ⚠️ <strong>MANDATORY PROTOCOL:</strong> You hold Vance's reagent exclusion log. Only Player B has the illustrated codex plate. Read and describe the chemical properties in English!
+      </div>
+    </div>
+
+    <!-- TAB 3: 2. CRYPT -->
+    <div class="tab-pane" id="tab-crypt">
+      <div class="canvas-container">
+        <img src="https://i.imgur.com/ReWyJxG.jpeg" alt="Sector 02 Stone Rubbings" class="document-image" crossorigin="anonymous">
+      </div>
+      <div class="zoom-hint">🔍 Dica: Dê zoom nos selos de grafite</div>
+      <div class="warning-box">
+        ⚠️ <strong>INVERTED ROLE PROTOCOL:</strong> You hold the pencil rubbings of the crypt seals. Player B will question you in English. Carefully describe the symbols and words below each drawing!
+      </div>
+    </div>
+
+    <!-- TAB 4: 3. STORAGE -->
+    <div class="tab-pane" id="tab-storage">
+      <div class="canvas-container">
+        <img src="https://i.imgur.com/Fv5lyG1.jpeg" alt="Sector 03 Bypass Rules" class="document-image" crossorigin="anonymous">
+      </div>
+      <div class="zoom-hint">🔍 Dica: Dê zoom nas regras de bypass</div>
+      <div class="warning-box">
+        ⚠️ <strong>MANDATORY PROTOCOL:</strong> You hold the compressor bypass rules. Player B has the blueprints. Talk in English to identify the single functional bypass route!
+      </div>
+    </div>
+
+    <!-- TAB 5: 4. VAULT -->
+    <div class="tab-pane" id="tab-vault">
+      <div class="canvas-container">
+        <img src="https://i.imgur.com/DdNHg2u.jpeg" alt="Sector 04 Extraction Protocol" class="document-image" crossorigin="anonymous">
+      </div>
+      <div class="zoom-hint">🔍 Dica: Dê zoom nas 4 regras de coordenadas</div>
+      <div class="warning-box">
+        ⚠️ <strong>FINAL EXTRACTION PROTOCOL:</strong> You hold the 4 letter rules. Player B has the color wires. Share the 4 recovered passwords in sequence to reveal the final escape word!
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(paneId, btnElement) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btnElement.classList.add('active');
+      const targetPane = document.getElementById(paneId);
+      if (targetPane) targetPane.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
