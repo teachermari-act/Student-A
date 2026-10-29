@@ -46,6 +46,7 @@
     font-weight: bold;
     cursor: pointer;
   }
+
   .act-tabs {
     display: flex;
     gap: 4px;
@@ -69,6 +70,7 @@
     color: var(--accent-gold);
     border-color: var(--accent-gold);
   }
+
   .objective-banner {
     background: #1f140e;
     border-left: 3px solid var(--accent-gold);
@@ -99,6 +101,7 @@
     font-weight: 600;
     line-height: 1.3;
   }
+
   .doc-frame {
     flex: 1;
     position: relative;
@@ -128,6 +131,7 @@
     border-radius: 4px;
     pointer-events: none;
   }
+
   .notes-panel {
     background: var(--card);
     border: 1px solid var(--border);
@@ -149,8 +153,7 @@
   }
   .grid-act1 { grid-template-columns: repeat(6, 1fr); }
   .grid-act2 { grid-template-columns: repeat(4, 1fr); }
-  .grid-act3 { grid-template-columns: repeat(3, 1fr); }
-  .grid-act4 { grid-template-columns: repeat(4, 1fr); }
+
   .chip {
     background: #221d18;
     border: 1px solid var(--border);
@@ -174,6 +177,7 @@
     border-color: #27ae60;
     color: #58d68d;
   }
+
   .modal {
     display: none;
     position: fixed;
@@ -230,7 +234,8 @@
   <span class="zoom-tag">🔍 Pinch to Zoom</span>
 </div>
 
-<div class="notes-panel">
+<!-- Barra inferior com chips (ativa nas partes 1 e 2; completamente removida das partes 3 e 4 para nao dar respostas) -->
+<div class="notes-panel" id="notes-panel">
   <div class="instruction">
     Tap to track: 1x <span class="red">exclude (✕)</span> | 2x <span class="green">select (✓)</span> | 3x reset
   </div>
@@ -249,19 +254,6 @@
     <div class="chip" id="c2-2" onclick="tapChip('c2-2')">Disinfectant</div>
     <div class="chip" id="c2-3" onclick="tapChip('c2-3')">Stimulant</div>
     <div class="chip" id="c2-4" onclick="tapChip('c2-4')">X-Cross</div>
-  </div>
-
-  <div class="chips-grid grid-act3" id="chips-act3" style="display:none;">
-    <div class="chip" id="c3-1" onclick="tapChip('c3-1')">Yellow ➔ R3</div>
-    <div class="chip" id="c3-2" onclick="tapChip('c3-2')">Blue ➔ R1</div>
-    <div class="chip" id="c3-3" onclick="tapChip('c3-3')">Green ➔ R2</div>
-  </div>
-
-  <div class="chips-grid grid-act4" id="chips-act4" style="display:none;">
-    <div class="chip" id="c4-1" onclick="tapChip('c4-1')">RED (5)</div>
-    <div class="chip" id="c4-2" onclick="tapChip('c4-2')">YELLOW (8)</div>
-    <div class="chip" id="c4-3" onclick="tapChip('c4-3')">HWY 9 (4)</div>
-    <div class="chip" id="c4-4" onclick="tapChip('c4-4')">EXIT 2 (2)</div>
   </div>
 </div>
 
@@ -308,10 +300,10 @@
     4: `
       <p style="font-size: 12px; color: #a3c9ab; margin-bottom: 8px;">Talk to Base to deduce the 4-digit escape code:</p>
       <ul>
-        <li><strong>Reading protocol rules:</strong> "The evacuation card says digit 1 is the Red Warning level..."</li>
-        <li><strong>Asking for code values:</strong> "What is the numerical code for the Red Warning Status in your log?"</li>
+        <li><strong>Reading protocol rules:</strong> "The evacuation card says step 1 is the Primary Lockout Alert..."</li>
+        <li><strong>Asking for code values:</strong> "What is the code for the Red light status in your dispatch log?"</li>
         <li><strong>Confirming highway route:</strong> "Which number corresponds to Highway 9 in the County Index?"</li>
-        <li><strong>Deducing final code:</strong> "Let's assemble the 4 digits: [Digit 1] [Digit 2] [Digit 3] [Digit 4]!"</li>
+        <li><strong>Confirming portal number:</strong> "What is the number for North Gate Portal 2?"</li>
       </ul>
     `
   };
@@ -320,8 +312,18 @@
     activeAct = act;
     ["1", "2", "3", "4"].forEach(a => {
       document.getElementById("tab-act" + a).className = (a == act) ? "tab-btn active" : "tab-btn";
-      document.getElementById("chips-act" + a).style.display = (a == act) ? "grid" : "none";
     });
+
+    const c1 = document.getElementById("chips-act1");
+    const c2 = document.getElementById("chips-act2");
+    if (c1) c1.style.display = (act === 1) ? "grid" : "none";
+    if (c2) c2.style.display = (act === 2) ? "grid" : "none";
+
+    // Oculta a barra inferior nas Partes 3 e 4 para não entregar respostas e dar 100% de tela limpa para o documento!
+    const notesPanel = document.getElementById("notes-panel");
+    if (notesPanel) {
+      notesPanel.style.display = (act === 1 || act === 2) ? "block" : "none";
+    }
 
     if (act === 1) {
       document.getElementById("lbl-badge").textContent = "Part 1";
@@ -337,8 +339,8 @@
       document.getElementById("dossier-img").src = "https://i.imgur.com/eGnSvmb.jpeg";
     } else if (act === 4) {
       document.getElementById("lbl-badge").textContent = "Part 4";
-      document.getElementById("lbl-objective").textContent = "Read Evacuation Protocol. Deduce the 4-digit code (5-8-4-2) to open the gate!";
-      document.getElementById("dossier-img").src = "https://i.imgur.com/NXfKgH9.jpeg";
+      document.getElementById("lbl-objective").textContent = "Read Evacuation Protocol. Guide Base to deduce the 4-digit gate code!";
+      document.getElementById("dossier-img").src = "https://i.imgur.com/AhrXJ8z.jpeg";
     }
   }
 
