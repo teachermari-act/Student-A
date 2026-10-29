@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>Counselor Field Dossier</title>
+<title>Counselor Field Dossier // Mobile (Acts 1-4)</title>
 <style>
   :root {
     --bg: #0d0c0a;
@@ -12,6 +12,7 @@
     --text: #ecdcc9;
     --muted: #8c7c6d;
     --green: #27ae60;
+    --accent-gold: #e67e22;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
   body {
@@ -21,7 +22,8 @@
     display: flex;
     flex-direction: column;
     padding: 8px;
-    gap: 8px;
+    gap: 6px;
+    overflow: hidden;
   }
   .header {
     background: var(--card);
@@ -33,7 +35,7 @@
     align-items: center;
     flex-shrink: 0;
   }
-  .header h1 { font-size: 13px; color: #e67e22; }
+  .header h1 { font-size: 13px; color: var(--accent-gold); font-weight: bold; }
   .btn-phrases {
     background: #1c2b1e;
     color: #58d68d;
@@ -44,7 +46,60 @@
     font-weight: bold;
     cursor: pointer;
   }
-  .map-frame {
+  .act-tabs {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .tab-btn {
+    flex: 1;
+    background: #1f1a14;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 2px;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: #2e1d12;
+    color: var(--accent-gold);
+    border-color: var(--accent-gold);
+  }
+  .objective-banner {
+    background: #1f140e;
+    border-left: 3px solid var(--accent-gold);
+    border-right: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 10px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .obj-badge {
+    background: var(--accent-gold);
+    color: #000;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .obj-text {
+    font-size: 11px;
+    color: #fcebd9;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .doc-frame {
     flex: 1;
     position: relative;
     background: #000;
@@ -54,8 +109,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 180px;
   }
-  .map-frame img {
+  .doc-frame img {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -76,29 +132,32 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 8px 10px;
+    padding: 6px 8px;
     flex-shrink: 0;
   }
   .instruction {
     font-size: 10px;
     color: var(--muted);
     text-align: center;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .instruction .red { color: #e74c3c; font-weight: bold; }
   .instruction .green { color: #58d68d; font-weight: bold; }
   .chips-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
     gap: 4px;
   }
+  .grid-act1 { grid-template-columns: repeat(6, 1fr); }
+  .grid-act2 { grid-template-columns: repeat(4, 1fr); }
+  .grid-act3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-act4 { grid-template-columns: repeat(4, 1fr); }
   .chip {
     background: #221d18;
     border: 1px solid var(--border);
     color: #dcd0c2;
     padding: 6px 0;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: bold;
     text-align: center;
     cursor: pointer;
@@ -115,8 +174,6 @@
     border-color: #27ae60;
     color: #58d68d;
   }
-
-  /* Phrases Modal */
   .modal {
     display: none;
     position: fixed;
@@ -152,26 +209,59 @@
 <body>
 
 <div class="header">
-  <h1>📋 Counselor Dossier (Exclusive Map)</h1>
+  <h1>📋 Counselor Field Dossier</h1>
   <button class="btn-phrases" onclick="toggleModal(true)">💬 Useful Phrases</button>
 </div>
 
-<div class="map-frame">
-  <img src="https://i.imgur.com/NXfKgH9.jpeg" alt="Camp Map">
+<div class="act-tabs">
+  <button class="tab-btn active" id="tab-act1" onclick="switchAct(1)">Part 1: Cabins</button>
+  <button class="tab-btn" id="tab-act2" onclick="switchAct(2)">Part 2: Infirmary</button>
+  <button class="tab-btn" id="tab-act3" onclick="switchAct(3)">Part 3: Generator</button>
+  <button class="tab-btn" id="tab-act4" onclick="switchAct(4)">Part 4: North Gate</button>
+</div>
+
+<div class="objective-banner">
+  <span class="obj-badge" id="lbl-badge">Part 1</span>
+  <span class="obj-text" id="lbl-objective">Search for the hidden emergency radio. Guide your partner!</span>
+</div>
+
+<div class="doc-frame">
+  <img id="dossier-img" src="https://i.imgur.com/NXfKgH9.jpeg" alt="Field Document">
   <span class="zoom-tag">🔍 Pinch to Zoom</span>
 </div>
 
 <div class="notes-panel">
   <div class="instruction">
-    Tap to track: 1x <span class="red">eliminate (✕)</span> | 2x <span class="green">candidate (✓)</span> | 3x reset
+    Tap to track: 1x <span class="red">exclude (✕)</span> | 2x <span class="green">select (✓)</span> | 3x reset
   </div>
-  <div class="chips-grid">
-    <div class="chip" id="ch-1" onclick="tapChip(1)">Cab 1</div>
-    <div class="chip" id="ch-2" onclick="tapChip(2)">Cab 2</div>
-    <div class="chip" id="ch-3" onclick="tapChip(3)">Cab 3</div>
-    <div class="chip" id="ch-4" onclick="tapChip(4)">Cab 4</div>
-    <div class="chip" id="ch-5" onclick="tapChip(5)">Cab 5</div>
-    <div class="chip" id="ch-6" onclick="tapChip(6)">Cab 6</div>
+  
+  <div class="chips-grid grid-act1" id="chips-act1">
+    <div class="chip" id="c1-1" onclick="tapChip('c1-1')">Cab 1</div>
+    <div class="chip" id="c1-2" onclick="tapChip('c1-2')">Cab 2</div>
+    <div class="chip" id="c1-3" onclick="tapChip('c1-3')">Cab 3</div>
+    <div class="chip" id="c1-4" onclick="tapChip('c1-4')">Cab 4</div>
+    <div class="chip" id="c1-5" onclick="tapChip('c1-5')">Cab 5</div>
+    <div class="chip" id="c1-6" onclick="tapChip('c1-6')">Cab 6</div>
+  </div>
+
+  <div class="chips-grid grid-act2" id="chips-act2" style="display:none;">
+    <div class="chip" id="c2-1" onclick="tapChip('c2-1')">Pain Relief</div>
+    <div class="chip" id="c2-2" onclick="tapChip('c2-2')">Disinfectant</div>
+    <div class="chip" id="c2-3" onclick="tapChip('c2-3')">Stimulant</div>
+    <div class="chip" id="c2-4" onclick="tapChip('c2-4')">X-Cross</div>
+  </div>
+
+  <div class="chips-grid grid-act3" id="chips-act3" style="display:none;">
+    <div class="chip" id="c3-1" onclick="tapChip('c3-1')">Yellow ➔ R3</div>
+    <div class="chip" id="c3-2" onclick="tapChip('c3-2')">Blue ➔ R1</div>
+    <div class="chip" id="c3-3" onclick="tapChip('c3-3')">Green ➔ R2</div>
+  </div>
+
+  <div class="chips-grid grid-act4" id="chips-act4" style="display:none;">
+    <div class="chip" id="c4-1" onclick="tapChip('c4-1')">RED (5)</div>
+    <div class="chip" id="c4-2" onclick="tapChip('c4-2')">YELLOW (8)</div>
+    <div class="chip" id="c4-3" onclick="tapChip('c4-3')">HWY 9 (4)</div>
+    <div class="chip" id="c4-4" onclick="tapChip('c4-4')">EXIT 2 (2)</div>
   </div>
 </div>
 
@@ -181,29 +271,93 @@
       <span>💬 Useful Communication Patterns</span>
       <span style="cursor:pointer;" onclick="toggleModal(false)">&times;</span>
     </h3>
-    <p style="font-size: 12px; color: #a3c9ab; margin-bottom: 8px;">Use these to talk to your partner:</p>
-    <ul>
-      <li><strong>Describing clues:</strong> "On my map, I can see..." / "There is a note from the sheriff saying..."</li>
-      <li><strong>Asking for police facts:</strong> "What does the incident file say about [location]?"</li>
-      <li><strong>Confirming colors & places:</strong> "Is there any information about door colors?"</li>
-      <li><strong>Formulating deductions:</strong> "So that means Cabin [number] is impossible because..."</li>
-    </ul>
+    <div id="phrases-content"></div>
     <button class="btn-phrases" style="width:100%; margin-top:8px;" onclick="toggleModal(false)">Close</button>
   </div>
 </div>
 
 <script>
-  const states = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+  let activeAct = 1;
+  const chipStates = {};
+
+  const phrasesData = {
+    1: `
+      <p style="font-size: 12px; color: #a3c9ab; margin-bottom: 8px;">Talk to your partner (Radio Base):</p>
+      <ul>
+        <li><strong>Describing clues:</strong> "On my map, I can see..." / "There is a note from the sheriff saying..."</li>
+        <li><strong>Asking for police facts:</strong> "What does the incident file say about [location]?"</li>
+        <li><strong>Confirming colors:</strong> "Is there any information about door colors?"</li>
+      </ul>
+    `,
+    2: `
+      <p style="font-size: 12px; color: #a3c9ab; margin-bottom: 8px;">Talk to Base about the medication order:</p>
+      <ul>
+        <li><strong>Reading sequence:</strong> "The physician ordered three steps. Step one is..."</li>
+        <li><strong>Asking for codes:</strong> "What is the bottle color or code for [medical effect]?"</li>
+        <li><strong>Warning about toxic vials:</strong> "Watch out! The report says never touch the vial with..."</li>
+      </ul>
+    `,
+    3: `
+      <p style="font-size: 12px; color: #a3c9ab; margin-bottom: 8px;">Talk to Base about breakers and wire tracing:</p>
+      <ul>
+        <li><strong>Reading startup sequence:</strong> "Section II says we must first engage the..."</li>
+        <li><strong>Asking for breaker letters:</strong> "Which switch letter corresponds to the [subsystem name]?"</li>
+        <li><strong>Tracing cross-wiring:</strong> "Follow the [color] wire from Switch [letter]! Where does it connect?"</li>
+      </ul>
+    `,
+    4: `
+      <p style="font-size: 12px; color: #a3c9ab; margin-bottom: 8px;">Talk to Base to deduce the 4-digit escape code:</p>
+      <ul>
+        <li><strong>Reading protocol rules:</strong> "The evacuation card says digit 1 is the Red Warning level..."</li>
+        <li><strong>Asking for code values:</strong> "What is the numerical code for the Red Warning Status in your log?"</li>
+        <li><strong>Confirming highway route:</strong> "Which number corresponds to Highway 9 in the County Index?"</li>
+        <li><strong>Deducing final code:</strong> "Let's assemble the 4 digits: [Digit 1] [Digit 2] [Digit 3] [Digit 4]!"</li>
+      </ul>
+    `
+  };
+
+  function switchAct(act) {
+    activeAct = act;
+    ["1", "2", "3", "4"].forEach(a => {
+      document.getElementById("tab-act" + a).className = (a == act) ? "tab-btn active" : "tab-btn";
+      document.getElementById("chips-act" + a).style.display = (a == act) ? "grid" : "none";
+    });
+
+    if (act === 1) {
+      document.getElementById("lbl-badge").textContent = "Part 1";
+      document.getElementById("lbl-objective").textContent = "Search for the hidden emergency radio. Guide your partner!";
+      document.getElementById("dossier-img").src = "https://i.imgur.com/NXfKgH9.jpeg";
+    } else if (act === 2) {
+      document.getElementById("lbl-badge").textContent = "Part 2";
+      document.getElementById("lbl-objective").textContent = "Read Patient Report. Guide Base to crack the medical strongbox!";
+      document.getElementById("dossier-img").src = "https://i.imgur.com/yDmpde2.png";
+    } else if (act === 3) {
+      document.getElementById("lbl-badge").textContent = "Part 3";
+      document.getElementById("lbl-objective").textContent = "Read Generator Manual. Guide Base through breakers and wire tracing!";
+      document.getElementById("dossier-img").src = "https://i.imgur.com/eGnSvmb.jpeg";
+    } else if (act === 4) {
+      document.getElementById("lbl-badge").textContent = "Part 4";
+      document.getElementById("lbl-objective").textContent = "Read Evacuation Protocol. Deduce the 4-digit code (5-8-4-2) to open the gate!";
+      document.getElementById("dossier-img").src = "https://i.imgur.com/NXfKgH9.jpeg";
+    }
+  }
+
   function toggleModal(open) {
+    if (open) {
+      document.getElementById("phrases-content").innerHTML = phrasesData[activeAct];
+    }
     document.getElementById("phrases-modal").classList.toggle("open", open);
   }
-  function tapChip(n) {
-    states[n] = (states[n] + 1) % 3;
-    const el = document.getElementById("ch-" + n);
-    if (states[n] === 1) el.className = "chip eliminated";
-    else if (states[n] === 2) el.className = "chip candidate";
+
+  function tapChip(id) {
+    chipStates[id] = ((chipStates[id] || 0) + 1) % 3;
+    const el = document.getElementById(id);
+    if (chipStates[id] === 1) el.className = "chip eliminated";
+    else if (chipStates[id] === 2) el.className = "chip candidate";
     else el.className = "chip";
   }
+
+  document.getElementById("phrases-content").innerHTML = phrasesData[1];
 </script>
 </body>
 </html>
